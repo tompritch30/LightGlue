@@ -341,6 +341,7 @@ class LightGlue(nn.Module):
     version = "v0.1_arxiv"
     url = "https://github.com/cvg/LightGlue/releases/download/{}/{}_lightglue.pth"
 
+    # Potential here to have stuff
     features = {
         "superpoint": {
             "weights": "superpoint_lightglue",
