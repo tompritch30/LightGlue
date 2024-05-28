@@ -215,11 +215,14 @@ def plot_colored_matches(kpts0, kpts1, errors, color_map=cm_RdGn, lw=1.5, ps=4, 
     # Create a custom color map
     cmap = LinearSegmentedColormap.from_list("custom_green_red", ["lime", "yellow", "red"], N=256)
 
-    normalized_errors = [min(e / error_threshold, 1.0) for e in errors]
+    # normalized_errors = [min(e / error_threshold, 1.0) for e in errors]
+    normalized_errors = np.clip(errors / error_threshold, 0, 1)
+
     print(normalized_errors)
     # Map normalized errors to colors
-    colors = [cmap(norm_err) for norm_err in normalized_errors]
+    # colors = [cmap(norm_err) for norm_err in normalized_errors]
 
+    colors = [color_map(1 - e) for e in normalized_errors]
     # Print the results for verification
     # for color in colors:
     #     print(color)

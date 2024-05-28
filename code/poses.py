@@ -117,14 +117,8 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 import cv2
+from superglueUtils import *
 
-# Camera intrinsics (example values)
-fx, fy, cx, cy = 320.0, 320.0, 320.0, 240.0
-fov = 90  # degrees
-width = 640
-height = 480
-
-# TartanAir Camera intrinsic matrix
 K = np.array([[320.0, 0, 320.0], [0, 320.0, 240.0], [0, 0, 1.0]])
 
 def load_pose_file(filename):
@@ -133,6 +127,7 @@ def load_pose_file(filename):
 
 def pose_to_matrix(pose):
     """Convert a pose (tx, ty, tz, qx, qy, qz, qw) to a 4x4 transformation matrix."""
+
     tx, ty, tz, qx, qy, qz, qw = pose
     rotation = R.from_quat([qx, qy, qz, qw])
     rotation_matrix = rotation.as_matrix()
@@ -143,12 +138,58 @@ def pose_to_matrix(pose):
 
     return transformation_matrix
 
+def compute_transform_with_adjustments(pose1, pose2, image0_shape=(480, 640), image1_shape=(480, 640), scales= [1.0, 1.0], rot0=0, rot1=0):
+    # Convert poses to transformation matrices
+    cam0_T_w = pose_to_matrix(pose1)
+    cam1_T_w = pose_to_matrix(pose2)
+
+    # Extract camera intrinsics directly from function arguments or a global definition
+    K0 = np.array([[320.0, 0, 320.0], [0, 320.0, 240.0], [0, 0, 1.0]])
+    K1 = np.array([[320.0, 0, 320.0], [0, 320.0, 240.0], [0, 0, 1.0]])
+
+    # K0 = K1 = np.array([320.0, 0., 320.0, 0., 320.0, 240.0, 0., 0., 1.])
+    # # Scale the intrinsics according to the provided scales
+    # K0 = scale_intrinsics(K0, scales)
+    # K1 = scale_intrinsics(K1, scales)
+    #
+    # # Adjust intrinsics and extrinsics if there is an EXIF rotation
+    # if rot0 != 0:
+    #     K0 = rotate_intrinsics(K0, image0_shape, rot0)
+    #     cam0_T_w = rotate_pose_inplane(cam0_T_w, rot0)
+    #
+    # if rot1 != 0:
+    #     K1 = rotate_intrinsics(K1, image1_shape, rot1)
+    #     cam1_T_w = rotate_pose_inplane(cam1_T_w, rot1)
+
+    # Calculate the adjusted transformation matrix from camera 1 to camera 0
+    cam1_T_cam0 = cam1_T_w @ np.linalg.inv(cam0_T_w)
+    T_0to1 = cam1_T_cam0
+
+    return T_0to1, K0, K1
+
+def get_pose_values(pose_file, idx1, idx2):
+    """Retrieve and convert poses for the specified indices to transformation matrices."""
+    poses = load_pose_file(pose_file)
+    pose1 = poses[idx1]
+    pose2 = poses[idx2]
+
+    print("in get_pose_matrices ensure correct line", pose1, pose2)
+
+    return pose1, pose2
+    # pose_matrix1 = pose_to_matrix(pose1)
+    # pose_matrix2 = pose_to_matrix(pose2)
+    #
+    # return pose_matrix1, pose_matrix2
+
 def get_pose_matrices(pose_file, idx1, idx2):
     """Retrieve and convert poses for the specified indices to transformation matrices."""
     poses = load_pose_file(pose_file)
     pose1 = poses[idx1]
     pose2 = poses[idx2]
 
+    # print("in get_pose_matrices ensure correct line", pose1, pose2)
+
+    # return pose1, pose2
     pose_matrix1 = pose_to_matrix(pose1)
     pose_matrix2 = pose_to_matrix(pose2)
 
