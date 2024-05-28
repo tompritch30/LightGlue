@@ -309,41 +309,41 @@ def compute_superglue_epipolar_error(kpts0, kpts1, T_0to1, K0, K1):
 
     return d
 
-# Define a pair of keypoints in two images
-kpts0 = np.array([
-    [150, 120], [200, 180], [250, 240], [300, 300], [350, 350],
-    [400, 100], [450, 200], [500, 250], [550, 300], [600, 350]
-], dtype=np.float32)
-
-kpts1 = np.array([
-    [152, 118], [198, 182], [249, 239], [298, 302], [348, 352],
-    [402, 98], [448, 202], [502, 248], [552, 298], [602, 348]
-], dtype=np.float32)
-
-# Define example poses
-pose1 = [0, 0, 0, 0, 0, 0, 1]  # Identity quaternion
-pose2 = [1, 0, 0, 0, 0, 1, 0]  # 180-degree rotation around z-axis
-
-pose_matrix1 = pose_to_matrix(pose1)
-pose_matrix2 = pose_to_matrix(pose2)
-
-# Construct transformation matrix T_0to1
-T_0to1 = np.linalg.inv(pose_matrix2) @ pose_matrix1
-
-# Normalize keypoints
-kpts0_normalized = normalize_keypoints(kpts0, K)
-kpts1_normalized = normalize_keypoints(kpts1, K)
-
-# Compute Essential matrix manually
-E_manual = compute_manual_essential_matrix(T_0to1)
-
-# Compute epipolar errors using original method
-epipolar_error = compute_epipolar_error(E_manual, kpts0_normalized, kpts1_normalized)
-print("Epipolar Error:\n", epipolar_error)
-
-# Use the SuperGlue method to compute epipolar error
-superglue_epipolar_error = compute_superglue_epipolar_error(kpts0, kpts1, T_0to1, K, K)
-print("SuperGlue Epipolar Error:\n", superglue_epipolar_error)
+# # Define a pair of keypoints in two images
+# kpts0 = np.array([
+#     [150, 120], [200, 180], [250, 240], [300, 300], [350, 350],
+#     [400, 100], [450, 200], [500, 250], [550, 300], [600, 350]
+# ], dtype=np.float32)
+#
+# kpts1 = np.array([
+#     [152, 118], [198, 182], [249, 239], [298, 302], [348, 352],
+#     [402, 98], [448, 202], [502, 248], [552, 298], [602, 348]
+# ], dtype=np.float32)
+#
+# # Define example poses
+# pose1 = [0, 0, 0, 0, 0, 0, 1]  # Identity quaternion
+# pose2 = [1, 0, 0, 0, 0, 1, 0]  # 180-degree rotation around z-axis
+#
+# pose_matrix1 = pose_to_matrix(pose1)
+# pose_matrix2 = pose_to_matrix(pose2)
+#
+# # Construct transformation matrix T_0to1
+# T_0to1 = np.linalg.inv(pose_matrix2) @ pose_matrix1
+#
+# # Normalize keypoints
+# kpts0_normalized = normalize_keypoints(kpts0, K)
+# kpts1_normalized = normalize_keypoints(kpts1, K)
+#
+# # Compute Essential matrix manually
+# E_manual = compute_manual_essential_matrix(T_0to1)
+#
+# # Compute epipolar errors using original method
+# epipolar_error = compute_epipolar_error(E_manual, kpts0_normalized, kpts1_normalized)
+# print("Epipolar Error:\n", epipolar_error)
+#
+# # Use the SuperGlue method to compute epipolar error
+# superglue_epipolar_error = compute_superglue_epipolar_error(kpts0, kpts1, T_0to1, K, K)
+# print("SuperGlue Epipolar Error:\n", superglue_epipolar_error)
 
 #
 # # Compute the Essential matrix

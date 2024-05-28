@@ -10,6 +10,7 @@ import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+from matplotlib.colors import LinearSegmentedColormap
 
 
 def cm_RdGn(x):
@@ -183,7 +184,7 @@ def save_plot(path, **kw):
     """Save the current figure without any white margin."""
     plt.savefig(path, bbox_inches="tight", pad_inches=0, **kw)
 
-def plot_colored_matches(kpts0, kpts1, errors, color_map=cm_RdGn, lw=1.5, ps=4, a=1.0, labels=None, axes=None):
+def plot_colored_matches(kpts0, kpts1, errors, color_map=cm_RdGn, lw=1.5, ps=4, a=1.0, labels=None, axes=None, error_threshold=2.0):
     """Plot matches for a pair of existing images with colors based on error values.
     Args:
         kpts0, kpts1: corresponding keypoints of size (N, 2).
@@ -211,10 +212,17 @@ def plot_colored_matches(kpts0, kpts1, errors, color_map=cm_RdGn, lw=1.5, ps=4, 
     # normalized_errors = [(e - min_error) / (max_error - min_error) for e in errors]
     # colors = [color_map(e) for e in normalized_errors]
 
-    # Define a threshold for the error normalization
-    threshold = 4000  # You can adjust this threshold based on your data
-    normalized_errors = [min(e / threshold, 1.0) for e in errors]
-    colors = [color_map(e) for e in normalized_errors]
+    # Create a custom color map
+    cmap = LinearSegmentedColormap.from_list("custom_green_red", ["lime", "yellow", "red"], N=256)
+
+    normalized_errors = [min(e / error_threshold, 1.0) for e in errors]
+    print(normalized_errors)
+    # Map normalized errors to colors
+    colors = [cmap(norm_err) for norm_err in normalized_errors]
+
+    # Print the results for verification
+    # for color in colors:
+    #     print(color)
 
     if lw > 0:
         for i in range(len(kpts0)):
@@ -226,12 +234,12 @@ def plot_colored_matches(kpts0, kpts1, errors, color_map=cm_RdGn, lw=1.5, ps=4, 
                 axesA=ax0,
                 axesB=ax1,
                 zorder=1,
-                color=colors[i][0],
+                color=colors[i],
                 linewidth=lw,
                 clip_on=True,
-                alpha=a,
-                label=None if labels is None else labels[i],
-                picker=5.0,
+                alpha=a #,
+                # label=None if labels is None else labels[i],
+                # picker=5.0,
             )
             line.set_annotation_clip(True)
             fig.add_artist(line)
