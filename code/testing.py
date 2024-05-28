@@ -23,8 +23,8 @@ torch.set_grad_enabled(False)
 ## Load extractor and matcher module
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # 'mps', 'cpu'
 
-imageIdx0 = 20
-imageIdx1 = 21
+imageIdx0 = 0
+imageIdx1 = 10
 
 image0_filename = f"{imageIdx0:06d}_left.png"
 image1_filename = f"{imageIdx1:06d}_left.png"
@@ -42,7 +42,6 @@ feats1 = extractor.extract(image1.to(device))
 
 # torch.save(feats0, 'feats0.pth')
 # torch.save(feats1, 'feats1.pth')
-
 
 ############ LightGlue #########
 # feats0 = torch.load('feats0.pth')
@@ -65,8 +64,8 @@ m_kpts0, m_kpts1 = kpts0[matches[..., 0]], kpts1[matches[..., 1]]
 
 # torch.save(m_kpts0, 'm_kpts0.pth')
 # torch.save(m_kpts1, 'm_kpts1.pth')
-# Is a list of coordinates from superglue for matches
 
+# Is a list of coordinates from superglue for matches
 # m_kpts0 = torch.load('m_kpts0.pth')
 # m_kpts1 = torch.load('m_kpts1.pth')
 
@@ -102,15 +101,11 @@ print("Reprojection Error Image 0:\n", error0)
 print("Reprojection Error Image 1:\n", error1)
 
 ## Using SuperGlue geometry functions
-# Normalize keypoints
-norm_kpts0 = (m_kpts0 - poses.K[[0, 1], [2, 2]][None]) / poses.K[[0, 1], [0, 1]][None]
-norm_kpts1 = (m_kpts1 - poses.K[[0, 1], [2, 2]][None]) / poses.K[[0, 1], [0, 1]][None]
-
 # Compute transformation matrix T_0to1 if not already available
 T_0to1 = np.linalg.inv(pose_matrix2) @ pose_matrix1
 
 # Calculate epipolar error using the SuperGlue method
-epipolar_error = superglueUtils.compute_epipolar_error(norm_kpts0, norm_kpts1, T_0to1, poses.K, poses.K)
+epipolar_error = superglueUtils.compute_epipolar_error(m_kpts0, m_kpts1, T_0to1, poses.K, poses.K)
 print("SuperGlue Epipolar Error with functions:\n", epipolar_error)
 
 # Create error dictionaries for each image
@@ -150,4 +145,3 @@ viz2d.add_text(0, 'Testing points from dict', fs=20)
 # Display the plot
 # plt.show()
 plt.savefig('colouringtrees.png')
-
