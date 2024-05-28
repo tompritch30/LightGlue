@@ -182,3 +182,65 @@ def add_text(
 def save_plot(path, **kw):
     """Save the current figure without any white margin."""
     plt.savefig(path, bbox_inches="tight", pad_inches=0, **kw)
+
+def plot_colored_matches(kpts0, kpts1, errors, color_map=cm_RdGn, lw=1.5, ps=4, a=1.0, labels=None, axes=None):
+    """Plot matches for a pair of existing images with colors based on error values.
+    Args:
+        kpts0, kpts1: corresponding keypoints of size (N, 2).
+        errors: error values for each match.
+        color_map: function to map error values to colors.
+        lw: width of the lines.
+        ps: size of the end points (no endpoint if ps=0)
+        a: alpha opacity of the match lines.
+    """
+    fig = plt.gcf()
+    if axes is None:
+        ax = fig.axes
+        ax0, ax1 = ax[0], ax[1]
+    else:
+        ax0, ax1 = axes
+    if isinstance(kpts0, torch.Tensor):
+        kpts0 = kpts0.cpu().numpy()
+    if isinstance(kpts1, torch.Tensor):
+        kpts1 = kpts1.cpu().numpy()
+    assert len(kpts0) == len(kpts1) == len(errors)
+    #
+    # # Normalize error values to [0, 1] for colormap
+    # min_error = min(errors)
+    # max_error = max(errors)
+    # normalized_errors = [(e - min_error) / (max_error - min_error) for e in errors]
+    # colors = [color_map(e) for e in normalized_errors]
+
+    # Define a threshold for the error normalization
+    threshold = 4000  # You can adjust this threshold based on your data
+    normalized_errors = [min(e / threshold, 1.0) for e in errors]
+    colors = [color_map(e) for e in normalized_errors]
+
+    if lw > 0:
+        for i in range(len(kpts0)):
+            line = matplotlib.patches.ConnectionPatch(
+                xyA=(kpts0[i, 0], kpts0[i, 1]),
+                xyB=(kpts1[i, 0], kpts1[i, 1]),
+                coordsA=ax0.transData,
+                coordsB=ax1.transData,
+                axesA=ax0,
+                axesB=ax1,
+                zorder=1,
+                color=colors[i][0],
+                linewidth=lw,
+                clip_on=True,
+                alpha=a,
+                label=None if labels is None else labels[i],
+                picker=5.0,
+            )
+            line.set_annotation_clip(True)
+            fig.add_artist(line)
+
+    # freeze the axes to prevent the transform to change
+    ax0.autoscale(enable=False)
+    ax1.autoscale(enable=False)
+
+    if ps > 0:
+        ax0.scatter(kpts0[:, 0], kpts0[:, 1], c=[c[0] for c in colors], s=ps)
+        ax1.scatter(kpts1[:, 0], kpts1[:, 1], c=[c[0] for c in colors], s=ps)
+
