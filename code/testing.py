@@ -27,8 +27,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # 'mps', 
 all_epipolar_errors = []
 
 for i in range(1):
-    imageIdx0 = i
-    imageIdx1 = i+1
+    imageIdx0 = i+10
+    imageIdx1 = i+21
 
     image0_filename = f"{imageIdx0:06d}_left.png"
     image1_filename = f"{imageIdx1:06d}_left.png"

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Load epipolar errors
-epipolar_errors = np.loadtxt("epipolar_errors_six_offset.txt", delimiter=",")
+epipolar_errors = np.loadtxt("epipolar_errors.txt", delimiter=",")
 
 # Plot histogram
 plt.hist(epipolar_errors, bins=50, alpha=0.75, color='blue', edgecolor='black')
